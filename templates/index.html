@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+    {% load static %}
+    {% load bootstrap5 %}
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Tableau de bord</title>
+        <!-- Charger le CSS de Bootstrap -->
+        {% bootstrap_css %} 
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <link rel="icon" type="image/x-icon" href="{% static 'images/icon.png' %}">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    </head>
+    <body>
+        <div class="container-fluid">
+            <nav class="navbar navbar-light sticky-top" style="background-color: #014687;">
+              <div class="container-fluid">
+                <img
+                  src="{% static 'images/logo.png' %}"
+                  class="img-fluid object-fit-cover"
+                  alt="sary"
+                  srcset=""
+                  style="width:150px; height:60px"
+                />
+                <!-- <h2 class="text-white">TABLEAU DE BORD</h2>-->
+                {% block titre %}
+                {% endblock titre %}
+                <div class="btn-group">
+                  <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    DEPARTEMENT
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="itemprod">Production</li>
+                    <li class="dropdown-item" id="itemgpec">Formation</li>
+                    <li class="dropdown-item" id="itemrh">RH</li>
+                    <li class="dropdown-item" id="itemtransit">Transit</li>
+                    <li class="dropdown-item" id="itemqhse">QHSE</li>
+                    <li class="dropdown-item" id="itemplanning">Planning</li>
+                    <li class="dropdown-item" id="itemelec">ELEC</li>
+                    <li class="dropdown-item" id="itemaccueil">Accueil</li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+            
+            {% block content %}
+            {% endblock content %}
+        </div>
+        {% bootstrap_javascript %}
+        {% block javascript %} {% endblock javascript %}
+        <script>
+          document.addEventListener("DOMContentLoaded", function() {
+
+            //Sélectioonne les liens du dropdown
+            const linkProd = document.getElementById('itemprod');
+            const linkRh = document.getElementById('itemrh');
+            const linkTransit = document.getElementById('itemtransit');
+            const linkElec = document.getElementById('itemelec');
+            const linkAccueil = document.getElementById('itemaccueil');
+            const linkQhse = document.getElementById('itemqhse');
+            const linkPlanning = document.getElementById('itemplanning');
+            const linkGpec = document.getElementById('itemgpec')
+
+            //Ajoute les évennements clic
+            linkProd.addEventListener('click', function(event) {
+              window.location.href="{% url 'production:info_production' %}"
+              
+            });
+
+            linkRh.addEventListener('click', function() {
+              window.location.href="{% url 'rh:info_rh' %}"
+            });
+
+            linkTransit.addEventListener('click', function() {
+              window.location.href="{% url 'transit:info_transit' %}"
+            })
+
+            linkQhse.addEventListener('click', function() {
+              window.location.href="{% url 'qhse:info_qhse' %}"
+            })
+
+            linkPlanning.addEventListener('click', function() {
+              window.location.href="{% url 'planning:info_planning' %}"
+            })
+
+            linkElec.addEventListener('click', function() {
+              window.location.href="{% url 'elec:info_temperature' %}"
+            });
+            linkGpec.addEventListener('click', function() {
+              window.location.href="{% url 'gpec:plan_formation' %}"
+            })
+
+            linkAccueil.addEventListener('click', function() {
+              window.location.href="{% url 'info_accueil' %}"
+            })
+
+            let navbar = document.querySelector(".navbar"); // Sélectionne la barre de navigation
+            let threshold = 250; // Distance en pixels avant d'épingler la navbar
+
+            // window.addEventListener("scroll", function () {
+            //   if (window.scrollY > threshold) {
+            //     navbar.classList.add("fixed-top"); // Ajoute la classe si on scrolle plus de 100px
+            //   } else {
+            //     navbar.classList.remove("fixed-top"); // Retire la classe si on remonte en haut
+            //   }
+            // });
+          });
+        </script>
+    </body>
+</html>

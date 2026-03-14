@@ -1,0 +1,953 @@
+{% extends "index.html" %}
+{% load static %}
+{% load elec_filters %}
+{% load nombre_format %}
+
+{% block css %}
+<style>
+  .full-width-height {
+    width: 100%;
+    height: 100%;
+  }
+  .card-body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+</style>
+{% endblock css%}
+{% block titre %}
+  <h2 class="text-white">TABLEAU DE BORD</h2>
+{% endblock titre %}
+
+{% block content %}
+<div class="row g-0 mt-3 w-100 d-flex flex-wrap gap-3">
+  
+  <!-- Graphique Prod-->
+  <div class="card d-flex flex-column flex-lg-grow-1 col-12 col-lg-6" style="background-color: aliceblue;">
+    <h5 class="text-center mt-1">PRODUCTION</h5>
+    <div class="card-body full-width-height">
+      <div class="col-12">
+        <div class="row full-width-height">
+          <div class="chart" style="position: relative; width: 100%; height: 230px;"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+            <canvas id="chart-prod" class="chart-canvas chartjs-render-monitor chart-prod" style="height: 300; width: 100%;"></canvas>
+          </div>
+        </div>
+        <div class="row g-0 w-100 d-flex flex-wrap justify-content-between align-items-center gap-3">
+          {% for last_prod in prod %}
+            <!--Pétit écran-->
+            <div class="col-12 col-lg-4 d-lg-none">
+                <div class="card w-100" style="background-color: aliceblue;">
+                  <div class="card-header">
+                    <h6 class="text-center">{{last_prod.date|date:"d E Y"}}</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-0">
+                      <div class="col fw-bold flex-grow-2"> <span style="font-size: 12px;"> RETOUCHE : </span> </div>
+                        <div class="col flex-grow-1">
+                          <div class="progress position-relative flex-grow-1 full-width-height" style="height: 20px; background-color: rgb(207, 207, 238);">
+                            <span class="position-absolute w-100 h-100 d-flex justify-content-center align-items-center fw-bold" 
+                              style="line-height: 25px; font-size: 16px;">
+                              {{last_prod.retouche|floatformat:2}}%
+                            </span>
+                            <div style=" background-color: teal; height: 100%; width: {{last_prod.retouche|floatformat:0}}%;"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row g-0">
+                      <div class="col fw-bold"> <span style="font-size: 12px;"> SECOND CHOIX : </span> </div>
+                        <div class="col">
+                          <div class="progress position-relative flex-grow-1" style="height: 20px; background-color: rgb(207, 207, 238);">
+                            <span class="position-absolute w-100 h-100 d-flex justify-content-center align-items-center fw-bold" 
+                              style="line-height: 25px; font-size: 16px">
+                              {{last_prod.second_choix|floatformat:2}}%
+                            </span>
+                            <div style="background-color: teal; height: 100%; width: {{last_prod.second_choix|floatformat:0}}%"></div>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>    
+            </div>
+            <!--Grand écran-->
+            <div class="col d-none d-lg-flex">
+              <div class="card w-100" style="background-color: aliceblue;">
+                <div class="card-header">
+                  <h6 class="text-center">{{last_prod.date|date:"d E Y"}}</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row g-0">
+                    <div class="col fw-bold flex-grow-2"> <span style="font-size: 12px;"> RETOUCHE : </span> </div>
+                      <div class="col flex-grow-1">
+                        <div class="progress position-relative flex-grow-1 full-width-height" style="height: 20px; background-color: rgb(207, 207, 238);">
+                          <span class="position-absolute w-100 h-100 d-flex justify-content-center align-items-center fw-bold" 
+                            style="line-height: 25px; font-size: 16px;">
+                            {{last_prod.retouche|floatformat:2}}%
+                          </span>
+                          <div style=" background-color: teal; height: 100%; width: {{last_prod.retouche|floatformat:0}}%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row g-0">
+                    <div class="col fw-bold"> <span style="font-size: 12px;"> SECOND CHOIX : </span> </div>
+                      <div class="col">
+                        <div class="progress position-relative flex-grow-1" style="height: 20px; background-color: rgb(207, 207, 238);">
+                          <span class="position-absolute w-100 h-100 d-flex justify-content-center align-items-center fw-bold" 
+                            style="line-height: 25px; font-size: 16px">
+                            {{last_prod.second_choix|floatformat:2}}%
+                          </span>
+                          <div style="background-color: teal; height: 100%; width: {{last_prod.second_choix|floatformat:0}}%"></div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>    
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphique departement prod-->
+  <div class="card col-12 col-lg-5 d-flex flex-column flex-lg-grow-1" style="background-color: aliceblue;">
+    <h5 class="text-center mt-1">EFFICIENCE PAR DEPARTEMENT</h5>
+    <div class="card-body d-flex flex-column justify-content-center align-items-center full-width-height" style="height: 300px;">
+      <canvas id="ChartDepartement" class="full-width-height"></canvas>
+    </div>
+    <h5 class="text-center">
+        {{ date_ch|date:"d E Y"}}
+    </h5>
+  </div>
+</div>
+
+<!--ELEC, GPEC(Formation) et RH -->
+<div class="row g-0 mt-3 w-100 d-flex flex-wrap gap-3">
+  <!-- Graphique elec-->
+  <div class="card d-flex flex-column flex-lg-grow-1 col-12 col-lg-6" style="background-color: aliceblue;">
+    <h5 class="text-center mt-1">REPARTITION DES ARMOIRES PAR STATUS</h5>
+    {% regroup elec by batiment as batiment_list %}
+    <div class="card-body full-width-height">
+      <div class="row g-0 full-width-height gap-3">
+
+        <!--Pétit écran-->
+        <div class="col-12 col-lg-5 d-lg-none d-flex flex-column justify-content-center align-items-center full-width-height">
+          <div class="card" style="background-color: aliceblue;">
+            <div class="card-body d-flex flex-column full-width-height">
+              <div class="row ">
+                <div class="col col-lg-6 d-flex flex-column full-width-height">
+                  {% for batiment in batiment_list %}
+                    <h5 class="card-title d-flex align-items-center gap-5">
+                      <span class="fs-6"> 
+                        <a href="#" class="batiment-link" data-batiment="{{ batiment.grouper }}">
+                          {{ batiment.grouper }}
+                        </a>
+                      </span> 
+                    </h5>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>   
+        </div>
+
+        <!--Grand écran-->
+        <div class="col-12 col-lg-3 d-none d-lg-flex flex-column justify-content-center align-items-between full-width-height">
+          <div class="card" style="background-color: aliceblue;">
+            <div class="card-body d-flex flex-column full-width-height">
+              <div class="row ">
+                <div class="col d-flex flex-column full-width-height">
+                  {% for batiment in batiment_list %}
+                    <h5 class="card-title d-flex align-items-center gap-5">
+                      <span class="fs-6"> 
+                        <a href="#" class="batiment-link" data-batiment="{{ batiment.grouper }}">
+                          {{ batiment.grouper }}
+                        </a>
+                      </span> 
+                    </h5>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>   
+        </div>
+
+        <div class="col-12 col-lg-6 d-flex flex-column justify-content-center full-width-height">
+          <canvas id="ChartElec" style="position: relative; height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+    {% for taux in taux_armoirbat %}
+      <h6>{{ taux|floatformat:2 }}</h6>
+    {% endfor %}
+    <h5 class="text-center">
+      {{ date_elec|date:"d E Y"}}
+    </h5>
+  </div>
+
+  <!-- Affichage formation GPEC -->
+  <div class="card card-gpec d-flex flex-column flex-lg-grow-1 col-12 col-lg-5" style="background-color: aliceblue;">
+  <h5 class="text-center mt-1">PLANNING DE FORMATION</h5>
+  <div class="card-body full-width-height table-wrapper">
+      {% if sessions_grouped %}
+        <div class="table-wrapper">
+          <div class="scrollable-body" style="max-height: 300px; overflow: auto;">
+            <table class="table table-bordered">
+              <thead class="table-secondary text-center">
+                <tr>
+                  <th>Date</th>
+                  <th>Intitulé</th>
+                  <th>Code</th>
+                  <th>Groupe</th>
+                </tr>
+              </thead>
+              <tbody>
+                 {% for s in sessions_grouped %}
+                    {% for d in s.details %}
+                      <tr>
+                        {% if forloop.first %}
+                          <td rowspan="{{ s.details|length }}">{{ s.date|date:"d/m/Y" }}</td>
+                          <td rowspan="{{ s.details|length }}">
+                            <a href="{% url 'gpec:plan_formation' %}?intitule={{ s.intitule }}&annee={{ s.annee }}&mois={{ s.mois }}&semaine={{ s.semaine }}">
+                              {{ s.intitule }}
+                            </a>
+                          </td>
+                        {% endif %}
+                        <td>{{ d.code }}</td>
+                        <td>{{ d.groupe }}</td>
+                      </tr>
+                    {% endfor %}
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% else %}
+        <div class="col d-flex justify-content-center align-items-center">
+          <div style="position: relative; display: inline-block; width: 60%; max-width: 400px;">
+            <img src="/static/images/logo gpec.png" alt="Logo Formation"
+                class="img-fluid"
+                style="opacity: 0.3; width: 100%; height: auto;">
+          </div>
+          <span style="position: absolute; top: 50%; left: 50%;
+                      transform: translate(-50%, -50%);
+                      color: teal; font-size: 20px; font-weight: bold;
+                      text-align: center; max-width: 90%;">
+            Aucune formation programmée actuellement!
+          </span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+<!-- Graphique rh -->
+  <div class="card d-flex flex-column flex-lg-grow-1 col-12 col-lg-5" style="background-color: aliceblue;">
+    <h5 class="text-center mt-1">RESSOURCES HUMAINES</h5>
+    <div class="card-body full-width-height">
+      <div class="row g-0 full-width-height g-1">
+        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center full-width-height">
+          <div class="card" style="background-color: aliceblue;">
+            <div class="card-body full-width-height d-flex flex-column justify-content-center align-items-center" style="position: relative; height: 300px; min-height: 300px; background-color: aliceblue;">
+              <canvas id="graphedonutRh"></canvas>
+            </div>
+            <h5 class="text-center">
+              {% with rh|last as last_rh %}
+              {% if last_rh %}
+                {{last_rh.date|date:"d E Y"}}
+              {% endif %}
+              {% endwith %}
+            </h5>
+          </div>
+        </div>
+        <div class="col-12 col-lg-8 d-flex flex-column justify-content-center align-items-center">
+            <div class="card h-100 w-100" style="background-color: aliceblue;">
+              <div class="card-body d-flex justify-content-center align-items-center full-width-height" style="position: relative; min-height: 300px; min-width: 300px;">
+                <canvas id="grapheRh"></canvas>
+              </div>
+            </div>
+        </div>
+    </div>
+    </div>
+  </div>
+
+<!-- Affichage solde commande client CIAL -->
+ <!--Pétit ecran-->
+    <div class="row mt-1 d-lg-none d-flex">
+        <h5 class="text-center mt-1">DERNIER SOLDE DE COMMANDE PAR CLIENT</h5>
+        <div class="table-wrapper mt-1">
+                <table class="table table-bordered">
+                    <thead class="text-center text-white" style="background-color: teal;">
+                        <tr style="vertical-align: middle;">
+                            <th>CLIENT</th>
+                            <th>SOLDE BATEAU</th>
+                            <th>SOLDE AVION</th>
+                            <th>SOLDE</th>
+                            <th>SEMAINE</th>
+                            <th>NBRE JOUR PROD</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% regroup valeur_solde by client as client_list %}
+                        {% for val_client in client_list %}
+                            {% with val_client.list|first as dernier_solde %}
+                                <tr class="fw-bold">
+                                    <td style="vertical-align: middle;">{{ dernier_solde.client.nom }}</td>
+                                    <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.s_bateau|separateur_millier}}</td>
+                                    <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.s_avion|separateur_millier}}</td>
+                                    <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.solde|separateur_millier}}</td>
+                                    <td class="text-center" style="vertical-align: middle;">S{{ dernier_solde.semaine}}</td>
+                                    <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.nb_jours|floatformat:"-2"|default:"" }}</td>
+                                </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        <div>
+            <p style="text-align: center; margin-top: 20px; font-size: 18px;">
+                📦 Unité de mesure : <strong>Pièce(s)</strong>
+            </p>
+        </div>
+    </div>
+
+    <!--Affichage grand écran-->
+    <div class="card mt-1 d-none d-lg-flex" style="background-color: aliceblue;">
+        <h5 class="text-center mt-1">DERNIER SOLDE DE COMMANDE PAR CLIENT</h5>
+        <div class="row g-0 gap-5 mt-1">
+            <div class="col justify-content-center align-items-center">
+                <div class="table-wrapper">
+                    <table class="table table-bordered">
+                        <thead class="text-center text-white" style="background-color: teal;">
+                            <tr style="vertical-align: middle;">
+                                <th>CLIENT</th>
+                                <th>SOLDE BATEAU</th>
+                                <th>SOLDE AVION</th>
+                                <th>SOLDE</th>
+                                <th>SEMAINE</th>
+                                <th>NBRE JOUR PROD</th>
+                            </tr>
+                        </thead>
+            
+                        <tbody>
+                            {% regroup valeur_solde by client as client_list %}
+                            {% for val_client in client_list %}
+                                {% with val_client.list|first as dernier_solde %}
+                                    <tr class="fw-bold">
+                                        <td style="vertical-align: middle;">{{ dernier_solde.client.nom }}</td>
+                                        <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.s_bateau|separateur_millier}}</td>
+                                        <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.s_avion|separateur_millier}}</td>
+                                        <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.solde|separateur_millier}}</td>
+                                        <td class="text-center" style="vertical-align: middle;">S{{ dernier_solde.semaine}}</td>
+                                        <td style="text-align: right; white-space: nowrap; vertical-align: middle;">{{ dernier_solde.nb_jours|floatformat:"-2"|default:"" }}</td>
+                                    </tr>
+                                {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <p style="text-align: center; margin-top: 20px; font-size: 18px;">
+                        📦 Unité de mesure : <strong>Pièce(s)</strong>
+                    </p>
+                </div>
+            </div>
+    
+            <div class="col mt-2 mb-2">
+                <div class="row g-0 d-flex justify-content-center align-items-center gap-3" style="opacity: 0.3;">
+                    <div class="col">
+                        <img src="{% static 'images/Logos CEPOVETT.png' %}" alt="" style="width: 250px; height: 150px;">
+                    </div>
+                    <div class="col">
+                        <img src="{% static 'images/Logos FRISTADS.png' %}" alt="" style="width: 250px; height: 150px;">
+                    </div>
+                    <div class="col">
+                        <img src="{% static 'images/Logos HEXONIA.png' %}" alt="" style="width: 250px; height: 150px;">
+                    </div>
+                    <div class="col">
+                        <img src="{% static 'images/Logos PETIT BATEAU.png' %}" alt="" style="width: 250px; height: 150px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block javascript %}
+<script>
+  //--------------------- PRODUCTION ---------------------------------
+  const labelsP = [
+    {% for last_prod in prod %}
+        "{{last_prod.date|date:'d E Y'}}"{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  ]
+
+  const efficienceP = [
+    {% for last_prod in prod %}
+    parseFloat("{{ last_prod.efficience|floatformat:2 }}".replace(",", ".")){% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  ]
+
+  const moyenneP = [
+    {% for last_prod in prod %}
+    parseFloat("{{ last_prod.effimoyen|floatformat:2 }}".replace(",", ".")){% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  ]
+
+  if (document.querySelector(".chart-prod")) {
+      var chartsLine = document.querySelectorAll(".chart-prod");
+
+      chartsLine.forEach(function(chart) {
+        var ctx = chart.getContext("2d");
+
+        var gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
+
+        gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
+        gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
+        gradientStroke1.addColorStop(0, "rgba(203,12,159,0)"); //purple colors
+
+        var gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
+
+        gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
+        gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
+        gradientStroke2.addColorStop(0, "rgba(20,23,39,0)"); //purple colors
+
+        if (!chart.getAttribute('data-chart-initialized')) {
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: labelsP,
+              datasets: [{
+                  label: "Efficience",
+                  tension: 0.4,
+                  borderWidth: 0,
+                  pointRadius: 0,
+                  borderColor: "#cb0c9f",
+                  borderWidth: 3,
+                  backgroundColor: gradientStroke1,
+                  fill: true,
+                  data: efficienceP,
+                  maxBarThickness: 6,
+                },
+                {
+                  label: "Moyenne",
+                  tension: 0.4,
+                  borderWidth: 0,
+                  pointRadius: 0,
+                  borderColor: "#3A416F",
+                  borderWidth: 3,
+                  backgroundColor: gradientStroke2,
+                  fill: true,
+                  data: moyenneP,
+                  maxBarThickness: 6,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+              },
+              interaction: {
+                intersect: false,
+                mode: "index",
+              },
+              scales: {
+                y: {
+                  grid: {
+                    drawBorder: false,
+                    display: true,
+                    drawOnChartArea: true,
+                    drawTicks: false,
+                    borderDash: [5, 5],
+                  },
+                  ticks: {
+                    callback:function(value){
+                      return value + " %";
+                    },
+                    display: true,
+                    padding: 10,
+                    color: "#000000",
+                    font: {
+                      size: 12,
+                      family: "Open Sans",
+                      style: "normal",
+                      lineHeight: 2,
+                    },
+                  },
+                },
+                x: {
+                  grid: {
+                    drawBorder: false,
+                    display: false,
+                    drawOnChartArea: false,
+                    drawTicks: false,
+                    borderDash: [5, 5],
+                  },
+                  ticks: {
+                    display: true,
+                    color: "#000000",
+                    padding: 20,
+                    font: {
+                      size: 12,
+                      family: "Open Sans",
+                      style: "normal",
+                      lineHeight: 2,
+                    },
+                  },
+                },
+              },
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: function(tooltipItem) {
+                      return tooltipItem.raw.toFixed(1) + " %";
+                    }
+                  }
+                }
+              }
+            },
+          });
+          chart.setAttribute("data-chart-initialized", "true");
+        }
+      });
+    };
+
+
+  //------------------------- EFFICIENCE JOURNALIERE DEPARTEMENT --------------------------
+ 
+  const labelsD = [
+    {% for prodD in prod_ch %}
+      "{{ prodD.num_chaine__chef_depart|default:'(Autres)' }}"{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  ];
+
+  const valeursD = [
+    {% for prodD in prod_ch %}
+      parseFloat("{{ prodD.moyenne_efficience|floatformat:2 }}".replace(",", ".")){% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  ];
+
+  //  Définir trois jeux de données avec des valeurs `null` pour masquer les barres inutiles
+  const dataRougeD = Array(valeursD.length).fill(null);
+  const dataJauneD = Array(valeursD.length).fill(null);
+  const dataVertD = Array(valeursD.length).fill(null);
+
+  valeursD.forEach((valeur, index) => {
+    if(valeur < 75){
+      dataRougeD[index] = valeur;
+    }
+    else if (valeur < 80){
+      dataJauneD[index] = valeur;
+    }
+    else {
+      dataVertD[index] = valeur;
+    }
+  });
+  const ctxD = document.getElementById('ChartDepartement').getContext('2d');
+
+  new Chart(ctxD, {
+    type: 'bar',
+    data: {
+      labels: labelsD,
+      datasets: [
+        {
+          label: 'Efficience < 75%',
+          data: dataRougeD,
+          backgroundColor: '#FF6567', // Rouge vif
+          borderColor: '#FF6567',
+          borderWidth: 1
+        },
+        {
+          label: '75% ≤ Efficience < 80%',
+          data: dataJauneD,
+          backgroundColor: '#FEEE08', // Jaune
+          borderColor: '#FEEE08',
+          borderWidth: 1
+        },
+        {
+          label: 'Efficience ≥ 80%',
+          data: dataVertD,
+          backgroundColor:'#07D01D', // Vert vif
+          borderColor: '#07D01D',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMax: 100,
+          ticks: {
+            callback:function(value){
+              return value + " %";
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(tooltipItem) {
+              return tooltipItem.raw.toFixed(1) + " %";
+            }
+          }
+        }
+      }
+    }
+  });
+
+
+
+   //------------------------- RH (DONUT) --------------------------
+  document.addEventListener("DOMContentLoaded", function () {
+    {% with rh|last as last_rh %}
+      {% if last_rh %}
+        var effectif = parseInt("{{ last_rh.effectif }}");
+        var absence = parseInt("{{ last_rh.absence}}");
+        var pourcentage = parseFloat("{{ last_rh.pourcentage|floatformat:2 }}".replace(",", "."));
+      {% else %}
+        var effectif = 0;
+        var pourcentage = 0;
+      {% endif %}
+    {% endwith %}
+
+
+    const labelRh = ["EFFECTIF", "ABSENCE"];
+
+    const valeurRh = [effectif, absence];
+
+    const centerTextPluginRh = {
+      id: 'centerTextPluginRh',
+      afterDraw: function (chart) {
+        const { width, height } = chart;
+        const ctx = chart.ctx;
+        const centerX = width / 2;
+        const centerY = height / 1.7;
+
+
+        // Dessiner le texte à  droite
+        ctx.font = "bold 25px Arial";
+        ctx.fillStyle = "red";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(pourcentage + "%", centerX, centerY);
+      }
+    };
+
+    const ctRh = document.getElementById('graphedonutRh').getContext('2d');
+
+    new Chart(ctRh, {
+      type: 'doughnut',
+      data: {
+        labels: labelRh,
+        datasets: [
+          {
+            data: valeurRh,
+            backgroundColor: ['teal', '#FF6567'],
+            borderColor: ['teal', '#FF6567'],
+            borderWidth: 1,
+            hoverOffset: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        cutout: '50%',
+        plugins: {
+          tooltip:{
+            callbacks: {
+              label: function(context){
+                let label = context.label || '';
+                let value = context.raw || 0;
+              }
+            }
+          }
+        }
+      },
+      plugins: [centerTextPluginRh]
+    });
+  });
+  
+  //------------------------- RH (LINE) --------------------------
+  document.addEventListener("DOMContentLoaded", function () {
+    const lab = [
+      {% for infoRh in rh %}
+        "{{infoRh.date|date:'d E Y'}}",
+      {% endfor %}
+    ];
+
+    const valeur = [
+      {% for infoRh in rh %}
+        parseFloat("{{ infoRh.pourcentage|default:0|floatformat:2 }}".replace(",", ".")){% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    ];
+
+    const contenu = document.getElementById('grapheRh');
+    new Chart(contenu, {
+      type: 'line',
+      data: {
+        labels:lab,
+        datasets: [{
+          label: "TAUX D'ABSENCE DU CINQ DERNIERES JOURS",
+          data:valeur,
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            suggestedMax: 10,
+            beginAtZero: true,
+            ticks: {
+              callback:function(value){
+                return value + " %";
+              }
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return "  " + tooltipItem.raw.toFixed(2) + "%"
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+    
+  //------------------------- ELEC --------------------------
+
+  //-----------------Par batiment--------------------------------
+  document.addEventListener("DOMContentLoaded", function () {
+    //Initiantion du pourcentage au centre du chart
+    var taux_armoire = parseFloat("{{ taux_armoir|floatformat:2 }}".replace(",","."))
+
+    const ctxElec = document.getElementById('ChartElec').getContext('2d');
+
+    const initialArmoir = {{ armoir }};
+    const initialArmoires = {{ nb_armoires }};
+    const initialRestant = initialArmoires - initialArmoir;
+
+    let dataInit, labelsInit, colorsInit, offsetInit;
+
+    if (initialArmoir === 0) {
+      dataInit = [initialArmoires];
+      labelsInit = ["✅ OK (" + initialArmoires + " armoire(s))"];
+      colorsInit = ['green'];
+      pourcentageElec = 0;
+    } else if (initialRestant === 0) {
+      dataInit = [initialArmoir];
+      labelsInit = ["🚨 Critique (" + initialArmoir + " armoire(s))"];
+      colorsInit = ['red'];
+      pourcentageElec = taux_armoire;
+    } else {
+      dataInit = [initialArmoir, initialRestant];
+      labelsInit = [
+        "🚨 Critique (" + initialArmoir + " armoire(s))",
+        "✅ OK (" + initialRestant + " armoire(s))"
+      ];
+      colorsInit = ['red', 'green'];
+      pourcentageElec = taux_armoire;
+    }
+
+    //Initiation de text pluggin
+    const centerTextPluginElec = {
+      id: 'centerTextPluginElec',
+      afterDraw: function (chart) {
+        const { width, height, ctx} = chart;
+        const centerX = width / 3;
+        const centerY = height / 1.7;
+
+        //Récupérer la valeur dynamique du pourcentage
+        const value = chart.options.plugins.centerTextPluginElec.value || 0;
+
+        ctx.save();
+        ctx.font = "bold 25px Arial";
+        ctx.fillStyle = "red";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(value + "%", centerX, centerY);
+        ctx.restore();
+      }
+    };
+
+    const chartElec = new Chart(ctxElec, {
+      type: 'doughnut',
+      data: {
+        labels: labelsInit,
+        datasets: [{
+          data: dataInit,
+          backgroundColor: colorsInit,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '50%',
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'nearest',
+          intersect: true
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'right',
+            labels: {
+              usePointStyle: true,
+              font: {
+                size: 14
+              }
+            },
+            onClick: function (e, legendItem, legend) {
+              const label = legendItem.text;
+              if (label.toLowerCase().includes("critique")) {
+                window.location.href = "info_temperature?site=&periode=tous&statut=critique";
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: 'Status général',
+            font: {
+              size: 18,
+              weight: 'bold'
+            }
+          },
+          centerTextPluginElec: {
+            value: pourcentageElec
+          }
+        },
+        // Clic sur un segment
+        onClick: function (event, elements) {
+          if (elements.length > 0) {
+            const chart = elements[0].element.$context.chart;
+            const index = elements[0].index;
+            const label = chart.data.labels[index];
+
+            if (label.toLowerCase().includes("critique")) {
+              window.location.href = "info_temperature?site=&periode=tous&statut=critique";
+            }
+          }
+        }
+      },
+      //Appel du text au centre (pluggin)
+      plugins: [centerTextPluginElec]
+    });
+
+
+    //Clic sur un bâtiment
+    document.querySelectorAll('.batiment-link').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Réinitialiser le style de tous les liens
+        document.querySelectorAll('.batiment-link').forEach(l => {
+          l.style.color = '';                // couleur par défaut
+          l.style.backgroundColor = '';
+          l.style.fontWeight = '';
+          l.style.textDecoration = '';
+          l.style.borderRadius = '';
+          l.style.padding = '';
+        });
+
+        // Appliquer le style spécial sur le lien cliqué
+        this.style.color = 'white';
+        this.style.backgroundColor = '#0d6efd'; // bleu
+        this.style.fontWeight = 'bold';
+        this.style.textDecoration = 'underline';
+        this.style.borderRadius = '5px';
+        this.style.padding = '3px 6px';
+
+        const batiment = this.dataset.batiment;
+
+        fetch(`temperature-par-batiment/?batiment=${batiment}`)
+          .then(response => response.json())
+          .then(data => {
+            const danger = data.nbsupparbat;
+            const total = data.nb_armoirbat;
+            const normal = total - danger;
+            const taux_bat = data.taux_armoirbat;
+
+            let newData, newLabels, newColors, newOffset;
+
+            if (danger === 0) {
+              newData = [total];
+              newLabels = ["✅ OK (" + total + " armoire(s))"];
+              newColors = ['green'];
+              newpourcentageElec = 0;
+            } else if (normal === 0) {
+              newData = [danger];
+              newLabels = ["🚨 Critique (" + danger + " armoire(s))"];
+              newColors = ['red'];
+              newpourcentageElec = taux_bat;
+            } else {
+              newData = [danger, normal];
+              newLabels = [
+                "🚨 Critique(" + danger + " armoire(s))", 
+                "✅ OK (" + normal + " armoire(s))"
+              ];
+              newColors = ['red', 'green'];
+              newpourcentageElec = taux_bat;
+            };
+
+            chartElec.data.labels = newLabels;
+            chartElec.data.datasets[0].data = newData;
+            chartElec.data.datasets[0].backgroundColor = newColors;
+
+            //Mettre à jour le plugin
+            chartElec.options.plugins.centerTextPluginElec.value = newpourcentageElec;
+
+            // Mettre à jour le titre du graphique
+            chartElec.options.plugins.title.text = `${batiment}`;
+        
+            chartElec.update();
+
+            //Mettre à jour l'évenement click du legende
+            chartElec.options.onClick = function(event, elements) {
+              if (elements.length > 0) {
+                const chart = elements[0].element.$context.chart;
+                const index = elements[0].index;
+                const label = chart.data.labels[index];
+
+                if (label.toLowerCase().includes("critique")) {
+                  window.location.href = `info_temperature?site=${batiment}&periode=tous&statut=critique`;
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Erreur lors du chargement des données :', error);
+          });
+      });
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const theadThs = document.querySelectorAll('.scrollable-body thead th');
+    theadThs.forEach(th => {
+      th.style.position = 'sticky';
+      th.style.top = '0';
+      th.style.backgroundColor = 'teal';
+      th.style.color = 'white';
+      th.style.zIndex = '10';
+      th.style.textAlign = 'center';
+    });
+  });
+</script>
+
+
+{% endblock javascript %}
+

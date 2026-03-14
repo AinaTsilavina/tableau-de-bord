@@ -1,0 +1,153 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block css %}
+    <style>
+        .btn_sweet_ok {
+            background-color: #20b2aa;
+            box-shadow: none !important;
+            border: 0 !important;
+        }
+        .btn_sweet_ok:hover {
+            background-color: #9370DB !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            transition:  background-color 1s;
+        }
+        .btn_error {
+            background-color: black !important;
+            color : white ;
+            box-shadow: none !important;
+        }
+        .btn_error:hover {
+            background-color: #DC143C !important;
+            color : white
+        }
+    </style>
+{% endblock css %}
+
+{% block content %}
+    <div class="col-12 col-sm-5 mx-auto mt-5">
+        <div class="jumbotron jumbotron-fluid bg-light px-5 pt-1 pb-5">
+            <h5 class="text-center mt-4"> NOUVEAU INFORMATION DE PRODUCTION </h5>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <label for="txtAprod" class="col-sm-3 col-form-label">Production : </label>
+                    <div class="col">
+                        <input type="number" class="form-control" name="txtAprod" id="txtAprod" required>
+                        <div class="invalid-feedback">Veuillez ajouter le nombre de production!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="txtAeffic" class="col-sm-3 col-form-label">Efficience :</label>
+                    <div class="col">
+                        <input type="number" class="form-control" name="txtAeffic" id="txtAeffic" step="0.01" required>
+                        <div class="invalid-feedback">Veuillez ajouter le pourcentage d'éfficience!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="txtAefficmoy" class="col-sm-3 col-form-label">Efficience moyenne :</label>
+                    <div class="col">
+                        <input type="number" class="form-control" name="txtAefficmoy" id="txtAefficmoy" step="0.01" required>
+                        <div class="invalid-feedback">Veuillez ajouter le pourcentage d'éfficience moyenne!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="txtAdateP" class="col-sm-3 col-form-label">Date</label>
+                    <div class="col">
+                        <div class="datepicker date input-group">
+                            <input type="date" placeholder="Choisir une date" class="form-control" id="txtAdateP" name="txtAdateP" required>
+                            <div class="invalid-feedback">Veuillez choisir une date!</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center align-items-center">
+                    <div class="col">
+                        <a href="{% url 'production:info_production' %}" class="btn btn-danger" style="width:200px;">Annuler</a>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary" style="width:200px;">Ajouter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
+{% block javascript %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const form = document.querySelector('form')
+
+            form.addEventListener('submit', function(event){
+                event.preventDefault();
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                const data = {
+                    product: document.getElementById('txtAprod').value,
+                    efficience: document.getElementById('txtAeffic').value,
+                    effimoyen: document.getElementById('txtAefficmoy').value,
+                    date: document.getElementById('txtAdateP').value
+                };
+
+                fetch("{% url 'production:ajout_info_prod' %}",{
+                    method: "POST",
+                    headers : {
+                        "X-CSRFToken": csrftoken,
+                        "Content-type":"application/json",
+                    },
+                    body : JSON.stringify(data),
+                })
+                .then((response) => response.json())
+                .then((data) =>{
+                    if(data.status === 'warning'){
+                        swal({
+                            title:"Attention,",
+                            text: data.message,
+                            icon:"warning",
+                            button: {
+                                text:"D'accord",
+                                className:'btn_sweet_ok'
+                            },
+                        });
+                        form.reset()
+                    }
+                    else if(data.status === 'success'){
+                        swal({
+                            title: "Succès",
+                            text: data.message,
+                            icon: "success",
+                            button: {
+                                text: "OK",
+                                className:'btn_sweet_ok'
+                             },
+                        }).then(() =>{
+                            window.location.href ="{% url 'production:info_production' %}";
+                        });
+                    }
+                    else{
+                        swal({
+                            text:"Une erreur s'est produite lors de l'ajout d'information",
+                            icon:"error",
+                            button:{
+                                text:'OK',
+                                className:"btn_error"
+                            }
+                        });
+                    }
+                })
+                .catch((error)=>{});
+                form.classList.add('was-validated')
+            },false)
+
+   
+        })
+        
+    </script>
+{% endblock javascript %}

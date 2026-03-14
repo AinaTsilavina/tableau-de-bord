@@ -1,0 +1,115 @@
+{% extends "index.html" %}
+{% load static %}
+{% block css %}
+{% endblock css%}
+
+{% block titre %}
+  <h2 class="text-white">RESSOURCES HUMAINES</h2>
+{% endblock titre %}
+
+{% block content %}
+<div class="row mt-4 d-flex justify-content-center align-items-center g-4">
+  {% for infoRh in rh|dictsort:"date" %}
+     <div class="col-12 col-md-4 col-lg-3">
+        <div class="card border-info mb-3 w-100">
+          <div class="card-header d-flex justify-content-center">
+            <div class="fs-4">
+             {{infoRh.date|date:"d E Y"}}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="mt-2">
+              <h5 class="card-title fs-5">
+                <span>EFFECTIF TOTAL :</span>
+                <span class="fs-3 fw-bold">
+                  {{ infoRh.effectif }}
+                </span>
+              </h5>
+            </div>
+            <div class="mt-2">
+              <h5 class="card-title fs-5">
+                <span>ABSENTS :</span>
+                <span class="fs-3 fw-bold">
+                  {{ infoRh.absence }}
+                </span>
+              </h5>
+            </div>
+            <div class="mt-2">
+              <h5 class="card-title fs-5">
+                <span>TAUX D'ABSENCE:</span>
+                <span class="fs-3 fw-bold">
+                   {{ infoRh.pourcentage|floatformat:2 }}%
+                </span>
+              </h5>
+            </div>
+          </div>
+       </div>
+     </div>
+  {% endfor %}
+
+  <div class="col-12 col-md-12 col-lg-6">
+    <canvas id="grapheRh" class="w-100"></canvas>
+  </div>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    const contenu = document.getElementById('grapheRh');
+
+    const ans = [
+      {% for an in rh_m %}
+        "{{an.mois|date:'Y'}}",
+      {% endfor %}
+    ];
+
+    const lab = [
+      {% for valmois in rh_m %}
+        "{{ valmois.mois|date:'E' }}",
+      {% endfor %}
+    ];
+
+    const valeur = [
+      {% for taux in rh_m %}
+        parseFloat("{{ taux.taux_abs|default:0|floatformat:2 }}".replace(",", ".")){% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    ];
+
+    new Chart(contenu, {
+      type: 'line',
+      data: {
+        labels:lab,
+        datasets: [{
+          label: "TAUX D'ABSENCE PAR MOIS DE L'ANNÉE " + ans[0],
+          data:valeur,
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            suggestedMax: 10,
+            beginAtZero: true,
+            ticks: {
+              callback:function(value){
+                return value + " %";
+              }
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return "  " + tooltipItem.raw.toFixed(2) + " %"
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+{% endblock javascript %}

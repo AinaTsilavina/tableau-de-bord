@@ -1,0 +1,7 @@
+#ignorer les fichiers et dossiers de compilation Python
+__pycache__/
+*.pyc
+*.rar
+.idea/
+*.sqlite3
+migrations/

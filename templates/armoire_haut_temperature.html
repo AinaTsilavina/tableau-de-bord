@@ -1,0 +1,78 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block titre %}
+  <h2 class="text-white">ARMOIRE ELECTRIQUE AVEC TEMPERATURE  ≥ 60°C</h2>
+{% endblock titre %}
+
+{% block content %}
+    <div class="row g-0 gap-3">
+        {% for elec in haut_temperature %}
+           <div class="col">
+            <div class="card mt-4" style="min-height: auto; height: auto; max-height: 760px;">
+                <div class="card-header">
+                    <h4 class="mt-2 text-center">{{ elec.date_armoire|date:"d E Y" }}</h4>
+                </div>
+                <div class="card-body" style="overflow-y: auto;">
+                    <div class="row mt-4 d-flex justify-content-center align-items-center gap-4">
+                        {% regroup elec.haut_temp by batiment as batiment_list %}
+                        {% for batiment in batiment_list %}
+                            {% regroup batiment.list by num as num_list %}
+                            {% for num in num_list %}
+                                <div class="col-12 col-md-4 col-lg-3 gap-3">
+                                    <div class="card mb-3 w-100" style="min-height: 300px; height: 300px; max-height: 300px;">
+                                        <div class="card-header d-flex justify-content-center" style="background-color: teal;">
+                                            {% regroup num.list by batiment as batiment_List %}
+                                            {% for batiment in batiment_List %}
+                                                <h5 class="fs-5 text-white fw-bold text-center">{{ batiment.grouper }}</h5>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="card-header d-flex justify-content-center" style="background-color: rgb(6, 129, 129, 0.2);">
+                                            <h5 class="fs-5 fw-bold text-center">Armoire {{ num.grouper }}</h5>
+                                        </div>
+                
+                                        <div class="card-body text-center" style="overflow-y: auto;">
+                                            {% regroup num.list by cat as cat_list %}
+                                            {% for cat in cat_list %}
+                                                <div class="mt-2">
+                                                    <h5 class="card-title fs-5 fw-bold">
+                                                        {{ cat.grouper }}
+                                                    </h5>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <h5 class="card-title fs-5">
+                                                        {% for val in cat.list %}
+                                                            {% if val.element %}
+                                                                <span>{{ val.element }} : </span>
+                                                                <span class="fs-4 fw-bold" style="color: red;">{{ val.temperature }}°C ;</span>
+                                                            {% else %}
+                                                                <span class="fs-4 fw-bold" style="color: red;">{{ val.temperature }}°C</span>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </h5>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                
+                                        <div class="card-footer text-center d-flex flex-wrap justify-content-center"
+                                        style="display: flex;
+                                        flex-wrap: wrap;
+                                        background-color: rgba(216, 228, 247, 0.3);
+                                        justify-content: center;
+                                        gap: 5px">
+                                            {% regroup num.list by local as local_list %}
+                                            {% for local in local_list %}
+                                                {{ local.grouper }}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+           </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

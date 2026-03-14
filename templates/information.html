@@ -1,0 +1,64 @@
+{% extends "index.html" %}
+{% load static %}
+{% block css %}
+{% endblock css%}
+
+{% block prod %}
+<h2 class="mt-5 mb-5 text-center">PRODUCTION</h2>
+<div class="row mt-5 mb-5 d-flex justify-content-center align-items-center g-4">
+  {% for infoProd in prod %}
+    <div class="col-12 col-md-4 col-lg-3">
+      <div class="card border-info mb-3 w-100">
+          <div class="card-header d-flex justify-content-center">
+            <div class="fs-4">
+              {{infoProd.date}}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="mt-2">
+              <h5 class="card-title fs-4">
+                <span> EFFICIENCE :</span> 
+                <span class="fs-2 fw-bold">{{infoProd.efficience}} %</span> 
+              </h5>
+            </div>
+            <div class="mt-2">
+              <h5 class="card-title fs-4">
+                <span> EFFICIENCE MOYENNE :</span> 
+                <span class="fs-2 fw-bold">{{infoProd.effimoyen}} %</span> 
+              </h5>
+            </div>
+          </div>
+        </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock prod %}
+
+{% block rh %}
+<h2 class="mt-5 mb-5 text-center">RESSOURCES HUMAINES</h2>
+<div class="row mt-5 d-flex justify-content-center align-items-center g-4">
+  {% for infoRh in rh %}
+     <div class="col-12 col-md-4 col-lg-3">
+        <div class="card border-info mb-3 w-100">
+          <div class="card-header d-flex justify-content-center">
+            <div class="fs-4">
+             {{infoRh.date}}
+            </div>
+          </div>
+          <div class="card-body">
+           <div class="mt-2">
+              <h5 class="card-title fs-4 text-center">
+                NOMBRE DE PERSONNES ABSENTES :  
+              </h5>
+           </div>
+            <div class="mt-2">
+              <h5 class="card-title fs-2 text-center fw-bold">
+               {{infoRh.absence}}
+              </h5>
+            </div>
+          </div>
+       </div>
+     </div>
+  {% endfor %}
+</div>
+{% endblock rh %}

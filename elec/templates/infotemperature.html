@@ -1,0 +1,171 @@
+{% extends "index.html" %}
+{% load static %}
+{% load elec_filters %}
+
+{% block css %}
+<style>
+ .table-wrapper {
+  overflow-x: auto;
+}
+
+.scrollable-body {
+  max-height: 795px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.scrollable-body table {
+  width: max-content;
+  min-width: 100%;
+  border: 1px solid black !important; /* bordure externe noire */
+}
+
+.scrollable-body th,
+.scrollable-body td {
+  border: 1px solid black !important; /* bordures internes noires */
+}
+
+.scrollable-body thead th {
+  position: sticky;
+  top: 0;
+  background-color: rgb(212, 229, 243);
+  z-index: 10;
+  text-align: center;
+}
+
+
+</style>
+{% endblock css %}
+
+{% block titre %}
+  <h2 class="text-white">TEMPERATURE ARMOIRE ELECTRIQUE</h2>
+{% endblock titre %}
+
+{% block content %}
+<div class="row mt-4">
+  <form method="get" class="mb-4" id="filtreForm">
+    <label for="site">Site :</label>
+    <select name="site" id="site" class="btn btn-info">
+      <option value="">Tous</option>
+      {% for s in sites %}
+        <option value="{{ s }}" {% if request.GET.site == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  
+    <label for="periode">Période :</label>
+    <select name="periode" id="periode" class="btn btn-info">
+      <option value="tous" {% if request.GET.periode == "tous" %}selected{% endif %}>Tous</option>
+      <option value="mois" {% if request.GET.periode == "mois" %}selected{% endif %}>Mois</option>
+      <option value="semaine" {% if request.GET.periode == "semaine" %}selected{% endif %}>Semaine</option>
+    </select>
+  
+    <label for="statut">Statut :</label>
+    <select name="statut" id="statut" class="btn btn-info">
+      <option value="">Tous</option>
+      <option value="critique" {% if request.GET.statut == "critique" %}selected{% endif %}>Critique</option>
+      <option value="ok" {% if request.GET.statut == "ok" %}selected{% endif %}>OK</option>
+    </select>
+  </form>
+  
+  <div class="table-wrapper">
+    <div class="scrollable-body" style="max-height: 795px; overflow: auto;">
+      <table class="table table-bordered table-secondary">
+        <thead class="text-center text-white">
+          <tr>
+            <th>SITE</th>
+            <th>ARMOIRE</th>
+            <th>EMPLACEMENT</th>
+            <th>DÉSIGNATION</th>
+            <th>COMPOSANT</th>
+            <th>STATUT SANTÉ</th>
+            {% for d in dates %}
+              <th>{{ d|date:"d/m" }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for site_group in site_list %}
+            {% for ligne in site_group.list %}
+              <tr>
+                {% if ligne.show_site %}
+                  <td rowspan="{{ ligne.site_rowspan }}">{{ ligne.batiment }}</td>
+                {% endif %}
+                {% if ligne.show_armoire %}
+                  <td rowspan="{{ ligne.armoire_rowspan }}">Armoire {{ ligne.armoire }}</td>
+                  <td rowspan="{{ ligne.armoire_rowspan }}">{{ ligne.emplacement }}</td>
+                {% endif %}
+                {% if ligne.show_designation %}
+                  <td rowspan="{{ ligne.designation_rowspan }}">{{ ligne.designation }}</td>
+                {% endif %}
+                <td>{{ ligne.composant }}</td>
+                <td>{{ ligne.statut }}</td>
+                {% for d in dates %}
+                  {% with temp=ligne.temperatures|get_item:d %}
+                    <td style="background-color: {% if temp and temp > 79 %}red{% endif %}; color: {% if temp and temp > 79 %}white{% endif %};">
+                      {{ temp|default:"" }}
+                    </td>
+                  {% endwith %}
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('filtreForm');
+      const selects = form.querySelectorAll('select');
+
+      selects.forEach(function(select) {
+        select.addEventListener('change', function() {
+          form.submit();
+        });
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Appliquer les styles spécifiques à la div scrollable
+      const scrollableDiv = document.querySelector('.scrollable-body');
+      if (scrollableDiv) {
+        scrollableDiv.style.maxHeight = '795px';
+        scrollableDiv.style.overflowY = 'auto';
+        scrollableDiv.style.overflowX = 'auto';
+      }
+
+      // Fixer l'entête si ce n'est pas déjà appliqué
+      const theadThs = document.querySelectorAll('.scrollable-body thead th');
+      theadThs.forEach(th => {
+        th.style.position = 'sticky';
+        th.style.top = '0';
+        th.style.backgroundColor = 'teal';
+        th.style.zIndex = '10';
+        th.style.textAlign = 'center';
+      });
+
+      // Rendre le tableau lui-même plus large si nécessaire
+      const table = scrollableDiv.querySelector('table');
+      if (table) {
+        table.style.width = 'max-content';
+        table.style.minWidth = '100%';
+        table.style.borderCollapse = 'separate';
+      }
+
+      // Script pour soumettre automatiquement le formulaire
+      const form = document.getElementById('filtreForm');
+      const selects = form.querySelectorAll('select');
+      selects.forEach(function(select) {
+        select.addEventListener('change', function() {
+          form.submit();
+        });
+      });
+    });
+  </script>
+{% endblock javascript %}

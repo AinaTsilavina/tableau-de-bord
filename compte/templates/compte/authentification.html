@@ -1,0 +1,146 @@
+{% extends 'index.html' %}
+{% block css %} 
+ <style>
+    .connexion {
+      min-height: 100vh !important ;
+      margin: 0 auto;
+    }
+ </style>
+{% endblock %} 
+{% block javascript %}
+   <script>
+      // Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  var forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+
+document.getElementById('userForm').addEventListener('submit', function() {
+  this.reset();  // Réinitialiser tous les champs du formulaire après soumission
+});
+
+   </script>
+{% endblock javascript %}
+{% block content %}
+{% load static %}
+<div class="row connexion d-flex justify-content-center align-items-center mt-5">
+  <div class="col-12 col-sm-10 col-md-10 col-lg-6 col-xl-4 col-xxl-3  bg-light p-5 ">
+      
+        <div class="logo d-flex flex-column-reverse flex-sm-row  flex-wrap justify-content-between  text-wrap text-center">
+                <div class=" d-flex align-items-center">
+                  <h5>TABLEAU DE BORD</h5>
+                </div>
+              
+                <img  src="{% static 'images/logo.png' %} "  width="150"  height="70" alt="logo epsilon" srcset="logo epsilon">
+        </div>
+        {% if messages %}
+                
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}warning{% else %}success{% endif %} alert-dismissible fade show d-flex mt-2" role="alert">
+          
+          {% if message.tags == 'error'  %}
+          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
+            <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </symbol>
+          <use xlink:href="#exclamation-triangle-fill"/></svg>
+          {% else %}
+          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/>
+            <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+            </symbol>
+          </svg>
+          {% endif %}
+            
+         
+          <div>
+            <strong>Informations</strong> {{message}}.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        
+        </div>
+        {% endfor %}
+          
+    {% endif %}
+              
+        <hr style="height:1px;border-width:0;color:gray;background-color:gray;width:25% ; text-align:center">
+        <div class="logo d-flex flex-column-reverse flex-sm-row  flex-wrap justify-content-between  text-wrap text-center">
+          <div class=" d-flex align-items-center">
+            <h5>Connexion</h5>
+          </div>
+        
+         
+  </div>
+  
+    <form novalidate method="POST" class="needs-validation">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+      <div class="mb-3 mt-3">
+        <label for="matricule">Matricule</label>
+        <input
+          type="number"
+          class="form-control"
+          id="matricule"
+          required
+          placeholder="Entrer matricule"
+          name="matricule"
+        />
+        <div class="invalid-feedback">S'il vous plaît, entrez votre Matricule !</div>
+      </div>
+      <div class="mb-3">
+        <label for="pwd">Mot de passe</label>
+        <input
+          type="password"
+          class="form-control"
+          id="pwd"
+          placeholder="Entrer  mot de passe"
+          name="password"
+          required
+        />
+        <div class="invalid-feedback">S'il vous plaît, saisissez votre mot de passe !</div>
+      </div>
+      <div class="form-check mb-3">
+        <label class="form-check-label"
+          ><input
+            class="form-check-input"
+            type="checkbox"
+            name="remember"
+          />Se souvenir de moi</label
+        >
+
+     
+      </div>
+      <div class="d-flex flex-wrap w-100  justify-content-between mb-3">
+        <a href="" class="btn btn-outline-secondary w-20 text-wrap  "> Mot de passe oublié ?
+           {% comment %} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-astonished" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+          <path d="M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5M4.884 4.022a2 2 0 0 1 1.458-.048.5.5 0 0 0 .316-.948 3 3 0 0 0-2.167.077 3.1 3.1 0 0 0-.773.478q-.036.03-.07.064l-.002.001a.5.5 0 0 0 .707.708l-.001.002.001-.002a2 2 0 0 1 .122-.1 2 2 0 0 1 .41-.232Zm6.232 0a2 2 0 0 0-1.458-.048.5.5 0 1 1-.316-.948 3 3 0 0 1 2.168.077 3 3 0 0 1 .773.478l.07.064v.001a.5.5 0 0 1-.706.708l.002.002-.002-.002a2 2 0 0 0-.122-.1 2 2 0 0 0-.41-.232ZM8 10c-.998 0-1.747.623-2.247 1.246-.383.478.08 1.06.687.98q1.56-.202 3.12 0c.606.08 1.07-.502.687-.98C9.747 10.623 8.998 10 8 10"/>
+        </svg> {% endcomment %}
+      </a>
+        <button type="submit" class="btn w-20  btn-search text-white ">Connectez-vous</button>
+      </div>
+      <div class=" mb-3">
+       
+       <label for="" class="">Vous avez déjà un compte ?</label><a href="">S'inscrire</a>
+      </div>
+      
+    </form>
+      
+  </div>
+</div>
+{% endblock %}

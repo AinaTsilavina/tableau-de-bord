@@ -1,0 +1,222 @@
+{% extends "index.html" %}
+
+{% load static %}
+
+{% block css %}
+<style>
+    .table-wrapper {
+    overflow-x: auto;
+    }
+
+    .scrollable-body {
+    max-height: 795px;
+    overflow-y: auto;
+    overflow-x: auto;
+    }
+
+    .scrollable-body table {
+    width: max-content;
+    min-width: 100%;
+    border: 1px solid black !important; /* bordure externe noire */
+    }
+
+    .scrollable-body th,
+    .scrollable-body td {
+    border: 1px solid black !important; /* bordures internes noires */
+    }
+
+    .scrollable-body thead th {
+    position: sticky;
+    top: 0;
+    background-color: rgb(212, 229, 243);
+    z-index: 10;
+    text-align: center;
+}
+</style>
+{% endblock  %}
+
+{% block titre %}
+    <h2 class="text-white">PLANNING DE FORMATION</h2>
+{% endblock titre %}
+
+{% block content %}
+    <div class="container mt-3">
+        <!--Filtre-->
+        <form method="get" class="row g-2 mb-3" id="filtreGpec">
+                <div class="col">
+                    <select name="annee" class="form-select" onchange="this.form.submit()">
+                        <option value="" {% if filters.annee == ""%}selected{% endif %}>Année</option>
+                        {% for a in annees %}
+                            <option value="{{ a }}" {% if filters.annee|stringformat:"s" == a|stringformat:"s" %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <select name="mois" class="form-select" onchange="this.form.submit()">
+                        <option value="" {% if filters.mois == "" %}selected{% endif %}>Mois</option>
+                        {% for m, nom in mois_list %}
+                            <option value="{{ m }}" {% if filters.mois|stringformat:"s" == m|stringformat:"s" %}selected{% endif %}>{{ nom }}</option>   
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <select name="semaine" class="form-select" onchange="this.form.submit()">
+                        <option value="" {% if filters.semaine == "" %}selected{% endif %}>Semaine</option>
+                        {% for s in semaines %}
+                            <option value="{{ s }}" {% if filters.semaine|stringformat:"s" == s|stringformat:"s" %}selected{% endif %}>S{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <select name="intitule" class="form-select" onchange="this.form.submit()">
+                        <option value="" {% if filters.intitule == "" %}selected{% endif %}>Intitulé</option>
+                        {% for i in intitules %}
+                            <option value="{{ i }}" {% if filters.intitule == i %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'gpec:plan_formation' %}" class="btn btn-secondary">Réinitialiser</a>
+                </div>
+        </form>
+    </div>
+    <!-- Carousel général -->
+    <div id="carouselGpec" class="carousel slide carousel-fade" data-bs-inter="false">
+        <div class="col-12 mt-3 d-flex justify-content-center">
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                {% for type_obj in types %}
+                    <input type="radio" class="btn-check" data-bs-target="#carouselGpec" data-bs-slide-to="{{ forloop.counter0 }}" name="btnradio" id="rdbtnGpec{{ forloop.counter0 }}" autocomplete="off" {% if forloop.first %}checked{% endif %}>
+                    <label for="rdbtnGpec{{ forloop.counter0 }}" class="btn btn-outline-primary">{{ type_obj.nom }}</label>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Contenu du carousel -->
+        <div class="carousel-inner mt-3">
+            {% for type_obj in types %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <h4 class="mb-3">{{ type_obj.nom }}</h4>
+                    <div class="table-wrapper">
+                        <div class="scrollable-body" style="max-height: 795px; overflow: auto;">
+                            <table class="table table-bordered">
+                                <thead class="text-center text-white bg-secondary">
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Mle</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Fonction</th>
+                                        <th>Départ</th>
+                                        <th>Code</th>
+                                        <th>Groupe</th>
+                                        <th>Date début</th>
+                                        <th>Date fin</th>
+                                        <th>H début</th>
+                                        <th>H fin</th>
+                                        <th>Intitulé formation</th>
+                                        <th>Salle</th>
+                                        <th>Remarque</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in type_obj.sessions_for_type %}
+                                        {% with total=session.participants_for_type|length%}
+                                            {%  if total > 0 %}
+                                                <!--Ligne de séparation par session-->
+                                                {% if not forloop.first %}
+                                                <tr style="background-color: teal; height: 1px;">
+                                                    <td colspan="15"></td>
+                                                </tr>
+                                                {% endif %}
+
+                                                {% for p in session.participants_for_type %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{ p.mle }}</td>
+                                                        <td>{{ p.nom }}</td>
+                                                        <td>{{ p.prenom }}</td>
+                                                        <td>{{ p.fonction }}</td>
+                                                        <td>{{ p.depart }}</td>
+                                                        {% if forloop.first %}
+                                                            <td rowspan="{{ total }}">{{ session.code }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.groupe }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.d_debut|date:"d/m/Y" }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.d_fin|date:"d/m/Y" }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.h_debut|time:"H:i" }}</td>
+                                                            <td role="{{ total }}">{{ session.h_fin|time:"H:i" }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.formation.intitule }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.salle }}</td>
+                                                            <td rowspan="{{ total }}">{{ session.remarque|default:"" }}</td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="carousel-item active">
+                    <p class="text-center">Aucun résultat trouvé</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+{% endblock content %}
+
+{% block javascript %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById('filtreGpec');
+            const selects = form.querySelectorAll('select');
+
+            selects.forEach(function(select) {
+                select.addEventListener('change', function() {
+                    form.submit();
+                });
+            });
+        });
+
+        //Scrolle
+        document.addEventListener('DOMContentLoaded', function () {
+            //Appliquer les styles spécifiques à la scrollable
+            const scrollableDiv = document.querySelector('.scrollable-body');
+            if (scrollableDiv) {
+                scrollableDiv.style.maxHeight = '795px';
+                scrollableDiv.style.overflowY = 'auto';
+                scrollableDiv.style.overflowX = 'auto';
+            }
+
+            // Fixer l'entête si ce n'est pas déjà appliqué
+            const theadThs = document.querySelectorAll('.scrollable-body thead th');
+            theadThs.forEach(th => {
+                th.style.position = 'sticky';
+                th.style.top = '0';
+                th.style.backgroundColor = 'teal';
+                th.style.zIndex = '10';
+                th.style.textAlign = 'center';
+            });
+
+            // Rendre le tableau lui-même plus large si nécessaire
+            const table = scrollableDiv.querySelector('table');
+            if (table) {
+                table.style.width = 'max-content';
+                table.style.minWidth = '100%';
+                table.style.borderCollapse = 'separate';
+            }
+
+            // Script pour soumettre automatiquement le formulaire
+            const form = document.getElementById('filtreGpec');
+            const selects = form.querySelectorAll('select');
+            selects.forEach(function(select) {
+                select.addEventListener('change', function() {
+                form.submit();
+                });
+            });
+
+        });
+    </script>
+{% endblock javascript %}

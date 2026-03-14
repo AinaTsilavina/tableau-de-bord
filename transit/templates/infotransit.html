@@ -1,0 +1,77 @@
+{% extends "index.html" %}
+{% load static %}
+{% load custum_filters %}
+
+{% block css %}
+{% endblock css %}
+
+{% block titre %}
+  <h2 class="text-white">INFORMATION TRANSIT</h2>
+{% endblock titre %}
+
+{% block content %}
+    <div class="row mt-4">
+        <div class="col-12 mt-5">
+            <div class="row d-flex justify-content-center align-items-center mt-4" style="background-color: rgb(247, 226, 40); height: 40px;">
+                <h3 class="text-center">
+                    Mise à jour {{ dat|date:"E Y" }}
+                </h3>
+            </div>
+
+            <div class="row g-0 mt-2" style="background-color: rgb(247, 252, 252);">
+                <div class="col-md-6 d-flex justify-content-center align-items-center">
+                    <div class="table-responsive">
+                        {% regroup valeur by type as type_list %}
+                        {% for type in type_list %}
+                            <table class="table table-bordered mt-4">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="background-color: rgb(247, 226, 40); max-width: 400px; min-width: 400px; width: 400px;">{{ type.grouper }}</th>
+                                            
+                                        {% regroup type.list by categ as categ_list %}
+                                        {% for categ in categ_list %}
+                                            <th scope="col" style="max-width: 100px; min-width: 100px; width: 100px;">{{categ.grouper}}</th>
+                                        {% endfor %}
+        
+                                        {% with type.list|first as valeurs %}
+                                            {% if valeurs.type|slice:":6" == "EXPORT" %}
+                                                <th scope="col">DELAI MOYEN RENDU CLIENT</th>
+                                            {% elif valeurs.type|slice:":6" == "IMPORT" %}
+                                                <th scope="col">DELAI MOYEN RENDU EPSILON</th>
+                                            {% else %}
+                                            <th scope="col" visible="false"></th>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% regroup type.list|dictsort:"info" by info as info_list %}
+                                    {% for info in info_list %}
+                                    <tr>
+                                        <th scope="row">{{info.grouper}}</th>
+                                        {% for valeurs in info.list %}
+                                        <td>{{valeurs.valeur|currency:valeurs.devise}}</td>
+                                        {%endfor%}
+                                        
+                                        {% with info.list|first as val %}
+                                        {% if val.type|slice:":3" != "FOB" %}
+                                        <td class="text-center">{% if val.delai != None %}{{val.delai}} Jrs{%endif%}</td>
+                                        {% else %}
+                                        <!-- <td>{{val.info|default:""}}</td> -->
+                                        <td visible="false"></td>
+                                        {% endif %}
+                                        {%endwith%}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center align-items-center">
+                    <img src="{% static 'images/logo_transit.png' %}" class="img-fluid" alt="Logo transit" style="opacity: 0.2;">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

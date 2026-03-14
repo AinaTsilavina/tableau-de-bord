@@ -1,0 +1,158 @@
+{% extends "index.html" %}
+{% load static %}
+{% load planning_filters %}
+{% block css %}
+
+<style>
+    .carousel-item {
+        padding-top: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }  
+    .carousel-caption {
+        top: 8%;
+        text-align: center;
+        color: #000 !important;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .carousel-item img {
+        max-height: 40vh;
+        width: auto;
+        margin: 0 auto;
+    }
+    .create_title {
+        font-weight: bolder;
+        color:#20b2aa;
+    }
+    .carousel-control-prev-icon, 
+    .carousel-control-next-icon {
+        background-color: blue !important;
+        font-size: 40px !important;
+        padding: 30px !important;
+        opacity: 1;
+    }
+    .content_carroussel {
+        max-height: 100vh !important;
+    }
+
+    .carousel-control-prev, 
+    .carousel-control-next {
+      opacity: 1 !important; /* Assure que les boutons sont visibles */
+      background-color: transparent !important;
+    }
+
+    .carousel-control-prev-icon, 
+    .carousel-control-next-icon {
+      background-color: black !important;
+      filter: invert(1) !important; /* Change la couleur blanche des icônes en noir */
+    }
+
+</style>
+{% endblock css %}
+
+{% block titre %}
+  <h2 class="text-white">MOYENNE D'ÉCART CHAÎNE ANNUEL</h2>
+{% endblock titre %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12 mt-4">
+        <div class="mx-auto content_carroussel">
+            {% regroup valeur by chaine as chaine_list %}
+            <div id="carouselPlanning" class="carousel slide" data-bs-ride="carousel" data-bs-interval="15000">
+
+                <!-- Indicateurs dynamiques -->
+                <!--Grand écran-->
+                <div class="col-12 d-none d-lg-flex">
+                  <div class="carousel-indicators" style="position: absolute; left: 50%; display: flex; justify-content: center; gap: 10px;">
+                    {% for chaine in chaine_list %}
+                        <button id="btncarouselPlanning" type="button" data-bs-target="#carouselPlanning" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-label="Slide {{ forloop.counter }}">
+                          <img src="{% static 'images/icon-indicator.png' %}" alt="" >
+                        </button>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <!--Petit écran-->
+                <div class="d-lg-none">
+                  <div class="carousel-indicators" style="position: absolute; left: 60%; display: flex; justify-content: center; width: 100%; gap: 10px;">
+                    {% for chaine in chaine_list %}
+                        <button id="btncarouselPlanning" type="button" data-bs-target="#carouselPlanning" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-label="Slide {{ forloop.counter }}">
+                          <img src="{% static 'images/icon-indicator.png' %}" alt="" >
+                        </button>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                {% for chaine in chaine_list %}
+                  <div class="carousel-item {% if forloop.first %}active{% endif %} mt-3">
+                    <h4 class="text-uppercase text-center mt-4 create_title">
+                      CHAÎNE {{ chaine.grouper|splitWords|last }}
+                    </h4>
+
+                    <div class="row g-0 mt-3" style=" background-color: rgb(255, 248, 240);">
+                      <div class="col-md-8">
+                        <div class="row mt-4 d-flex justify-content-center align-items-center g-2">
+                          {% for val in chaine.list %}
+                            <div class="col-md-4">
+                              <div class="card mb-3 w-100" style="min-height: 250px; height: 250px; max-height: 250px; width: 300px;">
+                                <div class="card-header d-flex justify-content-center" style="background-color: teal;">
+                                  <div class="fs-5 text-white fw-bold"> {{ val.famille_name }}</div> 
+                                </div>
+                                <div class="card-body text-center" style="overflow-y:auto;">
+                                  <h6 class="text-decoration-underline">REF</h6>
+                                  {% for ref in val.list_ref %}
+                                  <p>{{ ref }}</p>
+                                  {% endfor %}
+                                </div> 
+                                <div class="card-footer text-center d-flex flex-wrap justify-content-center" 
+                                  style="display: flex;
+                                  flex-wrap: wrap;
+                                  justify-content: center;
+                                  gap: 5px; background-color:red;">
+                                  <h5 class="card-title fs-3 fw-bold text-white">
+                                    {{ val.moyenne }}
+                                </h5>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+
+                      <div class="col-md-4 d-flex justify-content-center align-items-center">
+                        <img src="{% static 'images/'%}{{chaine.grouper|splitWords|last}}.jpg" alt="Image pantalon" class="img-fluid" style="opacity: 0.3; position: center; width: 100%; height: 100; size: contain;">
+                      </div>
+                    </div>
+
+                    
+                  </div>
+                {% endfor %}
+
+
+                <!-- Boutons de navigation --> 
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselPlanning" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true">
+                    <img src="{% static 'images/icon_prev.png' %}" alt="" >
+                  </span>
+                  <span class="visually-hidden">Précédent</span> 
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselPlanning" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true">
+                    <img src="{% static 'images/icon_next.png' %}" alt="" >
+                  </span>
+                  <span class="visually-hidden">Suivant</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+  
+{% endblock javascript %}

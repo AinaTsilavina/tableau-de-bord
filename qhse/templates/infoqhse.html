@@ -1,0 +1,155 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block css %}
+{% endblock css %}
+
+{% block titre %}
+<h2 class="text-white">INFORMATION QHSE</h2>
+{% endblock titre %}
+
+{% block content %}
+<div id="carouselQhse" class="carousel slide carousel-fade" data-bs-interval="false">
+    <div class="col-12 mt-3 d-flex justify-content-center">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" data-bs-target="#carouselQhse" data-bs-slide-to="0" name="btnradio" id="rdbtn0" autocomplete="off">
+            <label for="rdbtn0" class="btn btn-outline-primary">AUDIT EXTERNE</label>
+            <input type="radio" class="btn-check" data-bs-target="#carouselQhse" data-bs-slide-to="1" name="btnradio" id="rdbtn1" autocomplete="off">
+            <label for="rdbtn1" class="btn btn-outline-primary">AUDIT INTERNE</label>
+        </div>
+    </div>
+
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="col-12 mt-3 d-flex justify-content-center">
+                <button class="btn btn-info" onclick="ouvrirExplorateur()">Voir détails</button>
+            </div>
+            <div class="container py-3">
+                <div id="externe-col" class="d-flex flex-wrap justify-content-center w-100 gap-3"></div>
+            </div>
+        </div>
+
+        <div class="carousel-item">
+            <div class="col-12 mt-3 d-flex justify-content-center">
+                <button class="btn btn-info" onclick="ouvrirExplorateur()">Voir détails</button>
+            </div>
+            <div class="container py-3">
+                <div id="interne-col" class="d-flex flex-wrap justify-content-center w-100 gap-3"></div>
+            </div>
+        </div>
+
+        <script type="application/json" id="charts-data">
+            {{ doughnut_json|safe }}
+        </script>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+    <script>
+        const doughnutData = JSON.parse(document.getElementById('charts-data').textContent);
+        const groupedCharts = {};
+
+        doughnutData.forEach(entry => {
+            const [type, certificat, year] = entry.label.split(" - ");
+            const key = type + "_" + certificat;
+
+            if(!groupedCharts[key]) {
+                groupedCharts[key] = {
+                    type: type,
+                    certificat: certificat,
+                    entries: []
+                };
+            }
+
+            groupedCharts[key].entries.push({year: year, ...entry});
+        } );
+
+        //Afficher dans les colonnes correspondantes
+        Object.values(groupedCharts).forEach(group => {
+            const containerId = group.type === "INTERNE" ? "interne-col" : "externe-col";
+            const container = document.getElementById(containerId);
+
+            const card = document.createElement("div");
+            card.className = "card shadow-sm mb-4 p-3";
+
+            const title = document.createElement("h5");
+            title.textContent = "AUDIT " + group.type + " " + group.certificat;
+            title.className = "text-primary text-center mb-3";
+            card.appendChild(title);
+
+            const row = document.createElement("div");
+            row.className = "row";
+
+            group.entries.slice(0, 2).forEach((entry, idx) => {
+                const col = document.createElement("div");
+                col.className = "col";
+
+                const subtitle = document.createElement("h5");
+                subtitle.className = "text-center";
+                subtitle.textContent = entry.year;
+                col.appendChild(subtitle);
+
+                const canvas = document.createElement("canvas");
+                canvas.id = `chart-${group.certificat}-${entry.year}`;
+                canvas.style ='min-width: 250px; width: 250px; min-height: 250px; height:250px';
+                
+                col.appendChild(canvas);
+                row.appendChild(col);
+
+                setTimeout(() => {
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: entry.labels,
+                            datasets: [{
+                                data: entry.data,
+                                backgroundColor: entry.colors 
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                tooltip:{
+                                    callbacks: {
+                                        label: function(tooltipItem){
+                                            if (tooltipItem.label === "Sans Non_conformité") {
+                                                return ' ';
+                                            }
+                                            return  "  " + tooltipItem.raw;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }, 0);
+            });
+
+            card.appendChild(row);
+            container.appendChild(card);
+
+        });
+
+        //Affichage lien du fichier excel
+        function ouvrirExplorateur() {
+                    Swal.fire({
+                        title:"Copiez le lien ci-dessous dans votre explorateur de fichiers",
+                        html:  `<p style="color:blue; text-decoration:underline; word-wrap:break-word;">
+              \\\\appserver\\EPSILON\\3- DOSSIERS SERVICES\\QHSE\\Système intégré QHSE\\9 EVALUATION DES PERFORMANCES\\9.2 Audits\\Audit\\SUIVI DES ACTIONS\\EN 15 QHSE Plan d'action des écarts v5.xlsx
+           </p>`,
+                        imageUrl: "{% static 'images/icon excel.png' %}",
+                        imageWidth: 60,
+                        imageHeight: 60,
+                        confirmButtonText: "Fermer",
+                        customClass: {
+                            confirmButton: 'btn-confirme',
+                        }
+                    });
+        }
+    </script>
+{% endblock javascript %}
